@@ -27,7 +27,7 @@
  -  `--mega`
     - Mega link
  -  `--time`
-    - Screenshot time offset in seconds
+    - Screenshot time offset in seconds (video sample timestamps are also based on this)
  -  `--config`
     - Specify config file
 
