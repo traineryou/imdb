@@ -22,8 +22,6 @@
     - IMDB ID
  -  `--filename`
     - Video filename
- -  `--source`
-    - Source (torrents, etc)
  -  `--mega`
     - Mega link
  -  `--time`
