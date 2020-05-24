@@ -33,4 +33,4 @@
 
 ## Example
 
-<img src="https://i.imgur.com/5OnGWl8.png" width="500">
+<img src="https://i.imgur.com/j29kORZ.png" width="500">
