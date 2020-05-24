@@ -6,6 +6,7 @@
  - api key for [omdb](https://www.omdbapi.com/apikey.aspx)
  - api key for [imgur](https://api.imgur.com/oauth2/addclient)
  - a [streamable](https://streamable.com/) account
+ - [mediainfo](https://mediaarea.net/en/MediaInfo) installed and added to path
  - and [Python 3](https://www.python.org/downloads/release/python-377/)
 
 ## Setting Up
