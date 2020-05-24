@@ -14,13 +14,11 @@ from PIL import Image
 import pyperclip
 import shutil
 
-def main(imdb, filename, source, mega, time, config):
+def main(imdb, filename, mega, time, config):
     if imdb is None:
         imdb = input('IMDB ID:\n')
     if filename is None:
         filename = input('Video filename:\n')
-    if source is None:
-        source = input('Source URL:\n')
     if mega is None:
         mega = input('Mega link:\n')
     clear()
@@ -31,9 +29,8 @@ def main(imdb, filename, source, mega, time, config):
     links = upload(config, tmp_dir)
     imdb_info = get_imdb_info(imdb, config)
     mediainfo = get_mediainfo(filename)
-    source_name = get_source_name(source)
     screen_height = get_image_size(tmp_dir)
-    generate_text(imdb_info, mediainfo, links, screen_height, source, source_name, mega)
+    generate_text(imdb_info, mediainfo, links, screen_height, mega)
     cleanup(tmp_dir)
 
 # helper functions
@@ -64,8 +61,10 @@ def get_imdb_info(imdb, config):
     print ('Retrieving info from imdb...')
     omdb_api_key = config['omdb_api_key']
     url = f'http://www.omdbapi.com/?apikey={omdb_api_key}&i={imdb}'
+    url_fullplot = f'http://www.omdbapi.com/?apikey={omdb_api_key}&i={imdb}&plot=full'
     try:
         data = json.load(urllib.request.urlopen(url))
+        data['fullPlot'] = (json.load(urllib.request.urlopen(url_fullplot)))['Plot']
         return data
     except urllib.error.URLError as e:
         sys.exit (f'{e.reason}! Exiting.')
@@ -132,18 +131,6 @@ def upload(config, tmp_dir):
             sys.exit ('Error uploading to Streamable! Exiting.')
     return links
 
-def get_source_name(source):
-    if '1337x' in source:
-        return '1337x'
-    elif 'rarbg' in source:
-        return 'RARBG'
-    elif 'torrentgalaxy' in source:
-        return 'TGx'
-    elif 'nyaa.si' in source:
-        return 'Nyaa.si'
-    else:
-        return input('Input source name:\n')
-
 def get_image_size(tmp_dir):
     file = f'screen-01.jpeg'
     path = os.path.join(tmp_dir, file)
@@ -154,39 +141,38 @@ def get_image_size(tmp_dir):
     height_out = round(height/width*500)
     return height_out
 
-def generate_text(imdb_info, mediainfo, links, screen_height, source, source_name, mega):
+def generate_text(imdb_info, mediainfo, links, screen_height, mega):
     if imdb_info['Response']=='False':
         sys.exit (imdb_info['Error'])
     else:
-        out_text = f'''[center][img]{imdb_info['Poster']}[/img][/center]
+        out_text = f'''[imdb]{{
+  "poster": "{imdb_info['Poster']}",
+  "title": "{imdb_info['Title']}",
+  "year": "{imdb_info['Year']}",
+  "directors": "{imdb_info['Director']}",
+  "stars": "{imdb_info['Actors']}",
+  "ratings": "{imdb_info['imdbRating']}",
+  "votes": "{imdb_info['imdbVotes']}",
+  "runTime": "{imdb_info['Runtime']}",
+  "summary": "{imdb_info['fullPlot']}",
+  "shortSummary": "{imdb_info['Plot']}",
+  "genre": "{imdb_info['Genre']}",
+  "releaseDate": "{imdb_info['Released']}",
+  "viewerRating": "{imdb_info['Rated']}",
+  "language": "{imdb_info['Language']}",
+  "imdbId": "{imdb_info['imdbID']}",
+  "mediaType": "{imdb_info['Type']}"
+}}[/imdb]
 
-[center][size=150][color=#FF0000][b]{imdb_info['Title']} ({imdb_info['Year']})[/b][/color][/size][/center]
 
-[color=#FF8000][b]Director[/b][/color]: {imdb_info['Director']}
-[color=#FF8000][b]Writers[/b][/color]: {imdb_info['Writer']}
-[color=#FF8000][b]Stars[/b][/color]: {imdb_info['Actors']}
-
-[color=#FF8000][b]Runtime[/b][/color]: {imdb_info['Runtime']} (taken from IMDb)
-[color=#FF8000][b]Genre[/b][/color]: {imdb_info['Genre']}
-
-[color=#FF8000][b]Rating[/b][/color]: {imdb_info['imdbRating']}/10* (may differ)
-[color=#FF8000][b]Votes[/b][/color]: {imdb_info['imdbVotes']} (may differ)
-
-[color=#FF8000][b]Release Date[/b][/color]: {imdb_info['Released']} (taken from IMDb)
-[color=#FF8000][b]Viewer Rating (TV/MPAA)[/b][/color]: {imdb_info['Rated']} (taken from IMDb)
-
-[color=#FF8000][b]Summary[/b][/color]: [i]{imdb_info['Plot']}[/i]
-
-[color=#FF8000][b]Links[/b][/color]: [b][url=https://www.imdb.com/title/{imdb_info['imdbID']}]IMDb ({imdb_info['imdbID']})[/url][/b], [b][url={source}]{source_name} (Screenshots, MediaInfo, etc.)[/url][/b]
-
+[mediainfo]{mediainfo}[/mediainfo]
 [fimg=500,{screen_height}]{links['screen-01.jpeg']}[/fimg] [fimg=500,{screen_height}]{links['screen-02.jpeg']}[/fimg]
 
 [fimg=500,{screen_height}]{links['screen-03.jpeg']}[/fimg] [fimg=500,{screen_height}]{links['screen-04.jpeg']}[/fimg]
 
 [b][url={links['sample-001.mkv']}]Sample 1[/url][/b], [b][url={links['sample-002.mkv']}]Sample 2[/url][/b]
 
-[color=#FF8000][b]MediaInfo[/b][/color]:
-[mediainfo]{mediainfo}[/mediainfo][color=#0080FF][b]Direct Download Links[/b][/color]:
+[color=#0080FF][b]Direct Download Links[/b][/color]:
 [hide][b64]{mega}[/b64][/hide]
 Enjoy!'''
         pyperclip.copy(out_text)
@@ -210,8 +196,6 @@ parser.add_argument(
 parser.add_argument(
     '--filename', type=str, default=None, help='Video filename')
 parser.add_argument(
-    '--source', type=str, default=None, help='Source (torrents, etc)')
-parser.add_argument(
     '--mega', type=str, default=None, help='Mega link')
 parser.add_argument(
     '--time', type=int, default=1200, help='Screenshot time offset in seconds')
@@ -221,4 +205,4 @@ parser.add_argument(
 # running script
 if __name__ == '__main__':
     args = parser.parse_args()
-    main(args.imdb, args.filename, args.source, args.mega, args.time, args.config)
+    main(args.imdb, args.filename, args.mega, args.time, args.config)
