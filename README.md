@@ -12,8 +12,9 @@
 ## Setting Up
 
 1. Clone this repo or download as zip
-2. Input your api keys and streamble login into `config.json`
-3. For basic usage, run with `run.bat`
+2. Run `pip install -r requirements.txt`
+3. Input your api keys and streamble login into `config.json`
+4. For basic usage, run with `run.bat`
 
 ## Advanced Usage 
 
