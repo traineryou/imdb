@@ -10,4 +10,4 @@ pymkv==1.0.7
 pyperclip==1.8.0
 pystreamable==1.0.1
 requests==2.23.0
-urllib3==1.25.9
+urllib3==1.26.5
